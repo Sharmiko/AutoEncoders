@@ -17,7 +17,7 @@ transform = transforms.Compose(
         [transforms.ToTensor(),
         transforms.Normalize([0.5], [0.5])])
 
-trainset = torchvision.datasets.MNIST(root='./data', train=True,
+trainset = torchvision.datasets.MNIST(root='../data', train=True,
                                         download=True, transform=transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE,
                                           shuffle=True, num_workers=2)
@@ -63,4 +63,4 @@ for epoch in tqdm(range(EPOCHS)):
 print("Total Loss: {}".format(total_loss))
 
 # Save model state
-torch.save(autoencoder.state_dict(), "./model-states/AutoEncoder-[{}-Epochs]".format(EPOCHS))
+torch.save(autoencoder.state_dict(), "../model-states/AutoEncoder-[{}-Epochs]".format(EPOCHS))
