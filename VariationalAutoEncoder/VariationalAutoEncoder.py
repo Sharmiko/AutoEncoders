@@ -13,6 +13,7 @@ class Encoder(nn.Module):
         self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1)
         self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
 
+        # Leaky ReLU activation function
         self.leaky_relu = nn.LeakyReLU()
 
         # Output layer
@@ -20,23 +21,30 @@ class Encoder(nn.Module):
         self.log_var = nn.Linear(7 * 7 * 64, 2)
 
     def forward(self, t):
-
+        
+        # (1) Input Layer
         t = t
-
+        
+        # (2) First Hidden Conv Layer
         t = self.conv1(t)
         t = self.leaky_relu(t)
-
+        
+        # (3) Second Hidden Conv Layer
         t = self.conv2(t)
         t = self.leaky_relu(t)
 
+        # (4) Third Hidden Conv Layer
         t = self.conv3(t)
         t = self.leaky_relu(t)
-
+        
+        # (5) Forth Hidden Conv Layer
         t = self.conv4(t)
         t = self.leaky_relu(t)
-
+        
+        # (6) Flatten Layer
         t = t.view(-1, 7 * 7 * 64)
-
+        
+        # (7) Output Layer -> return mu and logvar
         return self.mu(t), self.log_var(t)
 
 # Decoder Class
@@ -45,7 +53,7 @@ class Decoder(nn.Module):
     def __init__(self):
         super(Decoder, self).__init__()
 
-        self.input = nn.Linear(2, 64 * 7 * 7)
+        self.fc = nn.Linear(2, 64 * 7 * 7)
 
         # Convolutional Transpose Layers
         self.convt1 = nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
@@ -56,21 +64,29 @@ class Decoder(nn.Module):
         self.leaky_relu = nn.LeakyReLU()
 
     def forward(self, t):
+        
+        # (1) Input Layer
         t = t
+        
+        # (2) Hidden Fully Connected Layer
+        t = self.fc(t)
 
-        t = self.input(t)
-
+        # (3) Reshape Layer -> reshape flat tensor into matrix
         t = t.view((-1, 64, 7, 7))
 
+        # (4) First Hidden Conv Layer
         t = self.convt1(t)
         t = self.leaky_relu(t)
-
+        
+        # (5) Second Hidden Conv Layer
         t = self.convt2(t)
         t = self.leaky_relu(t)
 
+        # (6) Third Hidden Conv Layer
         t = self.convt3(t)
         t = self.leaky_relu(t)
-
+        
+        # (7) Forth Hidden Conv Layer
         t = self.convt4(t)
 
         return t
@@ -85,16 +101,17 @@ class VariationalAutoEncoder(nn.Module):
         self.encoder = Encoder()
         self.decoder = Decoder()
         
-        
+    def reparam(self, mu, logvar):
+        epsilon = torch.randn_like(mu)
+        return mu + torch.exp(logvar / 2) * epsilon
+
     def forward(self, t):
 
        # encode
        mu, logvar = self.encoder(t)
        
        # reparametrize
-       std = torch.exp(logvar / 2)
-       eps = torch.randn_like(std)
-       x_sample = eps.mul(std).add_(mu)
+       x_sample = self.reparam(mu, logvar)
        
        # decode
        out = self.decoder(x_sample)

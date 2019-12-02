@@ -22,7 +22,8 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=BATCH_SIZE,
 
 # Loading the model
 autoencoder = VariationalAutoEncoder()
-autoencoder.load_state_dict(torch.load("../model-states/VariationalAutoEncoder-[10-Epochs]"))
+autoencoder.load_state_dict(torch.load(
+        "../model-states/VAE-[5-Epochs]"))
 autoencoder.to(device)
 
 
@@ -49,5 +50,5 @@ def imshow(inputs, labels, outputs):
         axes[1, i].imshow(outputs[i].view(28,28).numpy(), cmap="gray")
         axes[1, i].set_title("Encoded Number {}".format(labels[i]))
 
-imshow(images[:6].cpu(), labels[:6], encoded[:6].cpu())
+imshow(images[0:6].cpu(), labels[0:6], encoded[0:6].cpu())
 

@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from torch.nn import functional as F
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
@@ -12,7 +11,7 @@ device = ("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Load training data
 
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 
 transform = transforms.Compose(
         [transforms.ToTensor(),
@@ -28,13 +27,13 @@ trainloader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE,
 autoencoder = VariationalAutoEncoder().to(device)
 
 # Create optimizer and loss function
-optimizer = optim.Adam(autoencoder.parameters())
+optimizer = optim.Adam(autoencoder.parameters(), lr=1e-3)
 
-MSELoss = nn.MSELoss()
-
+loss_mse = nn.MSELoss()
+loss_kld = nn.KLDivLoss()
 # Training the model
 
-EPOCHS = 10
+EPOCHS = 5
 
 # training loop
 for epoch in tqdm(range(EPOCHS)):
@@ -51,18 +50,19 @@ for epoch in tqdm(range(EPOCHS)):
         optimizer.zero_grad()
 
         x_sample, mu, logvar = autoencoder(inputs)
+        
         x_sample = x_sample.to(device).float()
         mu = mu.to(device).float()
         logvar = logvar.to(device).float()
         
         # reconstruction loss
-        recon_loss = MSELoss(x_sample, inputs)
+        recon_loss = loss_mse(x_sample, inputs)
         
         # kl divergence loss
-        kl_loss = 0.5 * torch.sum(torch.exp(logvar) + mu ** 2 - 1.0  - logvar)
+        kld_loss = loss_kld(x_sample, inputs)
         
         # total loss
-        loss = recon_loss + kl_loss
+        loss = recon_loss + kld_loss
                 
         loss.backward()
         optimizer.step()
@@ -74,4 +74,5 @@ for epoch in tqdm(range(EPOCHS)):
 print("Total Loss: {}".format(total_loss))
 
 # Save model state
-torch.save(autoencoder.state_dict(), "../model-states/VariationalAutoEncoder-[{}-Epochs]".format(EPOCHS))
+torch.save(autoencoder.state_dict(), 
+           "../model-states/VAE-[{}-Epochs]".format(EPOCHS))
