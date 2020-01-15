@@ -4,6 +4,7 @@ import torch.nn as nn
 class Encoder(nn.Module):
 
     def __init__(self):
+        
         super(Encoder, self).__init__()
 
         # Convolutional layers
@@ -51,6 +52,7 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
 
     def __init__(self):
+        
         super(Decoder, self).__init__()
 
         self.fc = nn.Linear(2, 64 * 7 * 7)

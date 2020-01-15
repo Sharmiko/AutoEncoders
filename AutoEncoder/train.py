@@ -11,7 +11,7 @@ device = ("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Load training data
 
-BATCH_SIZE = 64
+BATCH_SIZE = 100
 
 transform = transforms.Compose(
         [transforms.ToTensor(),
@@ -33,12 +33,10 @@ criterion = nn.MSELoss()
 
 # Training the model
 
-EPOCHS = 5
+EPOCHS = 25
 
 # training loop
 for epoch in tqdm(range(EPOCHS)):
-
-    total_loss = 0.0
 
     for i, data in enumerate(trainloader, 0):
         inputs, labels = data
@@ -56,11 +54,8 @@ for epoch in tqdm(range(EPOCHS)):
         loss.backward()
         optimizer.step()
 
-        total_loss += loss.item()
 
-    print("Epoch {} / {}".format(epoch + 1, EPOCHS))
-
-print("Total Loss: {}".format(total_loss))
+    print("Epoch {}/{}; Loss: {}".format(epoch + 1, EPOCHS, loss))
 
 # Save model state
 torch.save(autoencoder.state_dict(), "../model-states/AE-[{}-Epochs]".format(EPOCHS))

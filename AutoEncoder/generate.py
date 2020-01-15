@@ -8,7 +8,7 @@ device = ("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Load Testing data dataset
 
-BATCH_SIZE = 64
+BATCH_SIZE = 100
 
 transform = transforms.Compose(
         [transforms.ToTensor(),
@@ -22,7 +22,7 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=BATCH_SIZE,
 
 # Loading the model
 autoencoder = AutoEncoder()
-autoencoder.load_state_dict(torch.load("../model-states/AE-[5-Epochs]"))
+autoencoder.load_state_dict(torch.load("../model-states/AE-[25-Epochs]"))
 autoencoder.to(device)
 
 
